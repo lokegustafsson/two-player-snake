@@ -30,7 +30,7 @@ namespace TwoPlayerSnake.Game
                 case Direction.Up: return new Pos(X, Y + 1);
                 case Direction.Down: return new Pos(X, Y - 1);
             }
-            throw new Exception("Received illegal Direction");
+            throw new ArgumentException("Received illegal Direction");
         }
 
         internal static Pos Random(Random rng)

@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwoPlayerSnake", "TwoPlayerSnake\TwoPlayerSnake.csproj", "{BE9737FA-417A-4EC8-BCD5-A08A8735263F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestTwoPlayerSnake", "TestTwoPlayerSnake\TestTwoPlayerSnake.csproj", "{5A2C5A50-1067-4906-851F-6B0F5BFDDF1A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwoPlayerSnake.Test", "TwoPlayerSnake.Test\TwoPlayerSnake.Test.csproj", "{5A2C5A50-1067-4906-851F-6B0F5BFDDF1A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
