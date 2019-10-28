@@ -16,8 +16,6 @@ namespace TwoPlayerSnake
         private GameView _gameView;
         private InputManager _input;
 
-        internal event Action<Exception> PropogateExceptionEvent;
-
         internal Coordinator(AppWindow appWindow)
         {
             _match = new Match();
