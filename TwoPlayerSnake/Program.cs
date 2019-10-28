@@ -22,6 +22,8 @@ namespace TwoPlayerSnake
             Timer timer = new Timer(Config.UpdateTimeMilliseconds);
             timer.Elapsed += (sender, elapsedArgs) =>
             {
+                // System.Timers.Timer silently swallows exceptions,
+                // so we need to explicitly log any errors and exit manually
                 try { coordinator.Update(); }
                 catch (Exception e)
                 {
