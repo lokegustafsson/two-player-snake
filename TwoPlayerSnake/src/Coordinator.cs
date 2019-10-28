@@ -42,7 +42,7 @@ namespace TwoPlayerSnake
         private void OnMatchFinishedEvent(MatchResult result)
         {
             Log.ForContext("Area", "Coordinator").Information("Match finished: {0}", result);
-            throw new NotImplementedException();
+            throw new NotImplementedException("OnMatchFinishedEvent is not fully implemented!");
         }
     }
 }
