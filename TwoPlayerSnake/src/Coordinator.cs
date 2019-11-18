@@ -1,48 +1,26 @@
-using Avalonia;
-using Avalonia.Input;
-using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Timers;
-using TwoPlayerSnake.Game;
-using TwoPlayerSnake.GUI;
+using System.Threading;
 
 namespace TwoPlayerSnake
 {
-    sealed class Coordinator
+    abstract class Coordinator
     {
-        private Match _match;
-        private GameView _gameView;
-        private InputManager _input;
+        private Timer _timer;
 
-        internal Coordinator(AppWindow appWindow)
+        internal void Run(TimeSpan period)
         {
-            _match = new Match();
-            _match.MatchFinishedEvent += OnMatchFinishedEvent;
-
-            _gameView = appWindow.GetGameView();
-
-            _input = new InputManager();
-            appWindow.KeyDown += _input.OnKeyDown;
+            // System.Threading.Timer silently swallows exceptions,
+            // so we need to explicitly log any errors and exit manually
+            _timer = new Timer((state) =>
+            {
+                try { Update(); }
+                catch (Exception e)
+                {
+                    Program.Log(this).Fatal(e, "Something unexpected happened:");
+                    System.Environment.Exit(-1);
+                }
+            }, null, 0, (int)period.TotalMilliseconds);
         }
-
-        internal void Update()
-        {
-            Stopwatch st = new Stopwatch(); st.Start();
-
-            // Placeholder direction until networking is implemented
-            _match.ApplyTurn(_input.Direction, Direction.Right);
-            _gameView.Update(_match.GetCells());
-
-            st.Stop();
-            Log.ForContext("Area", "Coordinator").Debug(String.Format("Update took {0} ms", st.ElapsedMilliseconds));
-        }
-
-        private void OnMatchFinishedEvent(MatchResult result)
-        {
-            Log.ForContext("Area", "Coordinator").Information("Match finished: {0}", result);
-            throw new NotImplementedException("OnMatchFinishedEvent is not fully implemented!");
-        }
+        protected abstract void Update();
     }
 }

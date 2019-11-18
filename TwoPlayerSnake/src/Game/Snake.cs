@@ -1,5 +1,4 @@
 using Serilog;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -36,7 +35,7 @@ namespace TwoPlayerSnake.Game
         internal void Grow()
         {
             _length++;
-            Log.ForContext("Area", "Game").Information("Snake {faction} grew to {length}", _faction, _length);
+            Program.Log(this).Information("Snake {faction} grew to {length}", _faction, _length);
         }
 
         internal Pos Head() => _body.First.Value;

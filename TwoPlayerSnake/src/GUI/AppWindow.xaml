@@ -5,6 +5,17 @@
         xmlns:local="clr-namespace:TwoPlayerSnake.GUI"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="TwoPlayerSnake.GUI.AppWindow"
-        Title="AvaloniaAppTemplate">
-  <local:GameView/>
+        Title="AvaloniaAppTemplate"
+        WindowStartupLocation="CenterScreen"
+        Name="MainWindow">
+  <DockPanel>
+    <Border Width="400" 
+            Height="400"
+            Background="LightGray"
+            DockPanel.Dock="Right">
+      <local:GameView Name="GameView"/>
+    </Border>
+    <local:PlayerListView Name="PlayerListView" DockPanel.Dock="Top"/>
+    <local:PlayerDataBox Name="PlayerDataBox" DockPanel.Dock="Bottom"/>
+  </DockPanel>
 </Window>

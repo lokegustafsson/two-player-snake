@@ -1,6 +1,4 @@
-using Serilog;
 using System;
-using System.Collections.Generic;
 
 namespace TwoPlayerSnake.Game
 {
@@ -52,11 +50,11 @@ namespace TwoPlayerSnake.Game
             }
             else if (hostileDead)
             {
-                MatchFinishedEvent(MatchResult.friendlyWon);
+                MatchFinishedEvent(MatchResult.FriendlyWon);
             }
             else if (friendlyDead)
             {
-                MatchFinishedEvent(MatchResult.hostileWon);
+                MatchFinishedEvent(MatchResult.HostileWon);
             }
 
             // Food

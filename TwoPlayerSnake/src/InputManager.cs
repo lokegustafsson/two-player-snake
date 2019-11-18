@@ -1,7 +1,4 @@
-using Avalonia;
 using Avalonia.Input;
-using System;
-using TwoPlayerSnake.Game;
 
 namespace TwoPlayerSnake
 {

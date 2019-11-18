@@ -1,16 +1,16 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Serilog;
 using System;
-using TwoPlayerSnake.Game;
 
 namespace TwoPlayerSnake.GUI
 {
     sealed class GameView : Control
     {
+        private const int GridLineThickness = 5;
+
         private readonly Pen _borderPen;
         private readonly Brush _emptyBrush;
         private readonly Brush _foodBrush;
@@ -21,7 +21,7 @@ namespace TwoPlayerSnake.GUI
 
         public GameView()
         {
-            _borderPen = new Pen(new SolidColorBrush(Colors.WhiteSmoke), thickness: Config.GridLineThickness);
+            _borderPen = new Pen(new SolidColorBrush(Colors.WhiteSmoke), thickness: GridLineThickness);
             _emptyBrush = new SolidColorBrush(Colors.DarkSlateGray);
             _foodBrush = new SolidColorBrush(Colors.IndianRed);
             _friendlyBrush = new SolidColorBrush(Colors.LimeGreen);
@@ -29,13 +29,13 @@ namespace TwoPlayerSnake.GUI
 
             //  Initialize _cells so that GameView.Render() doesn't throw an exception.
             //  Note that Avalonia calls Render() in a context that silently ignores exceptions,
-            //  so this would simply fail silently and mysteriously.
+            //  so it would simply fail silently and mysteriously.
             _cells = new CellStatus[Config.GridSize, Config.GridSize];
 
-            Log.ForContext("Area", "GUI").Information("GameView initialized");
+            Program.Log(this).Information("GameView initialized");
         }
 
-        internal void Update(CellStatus[,] cells)
+        internal void SetData(CellStatus[,] cells)
         {
             _cells = cells;
             // Push re-render to the UIThread queue
@@ -73,7 +73,7 @@ namespace TwoPlayerSnake.GUI
                     context.DrawRectangle(_borderPen, cell);
                 }
             }
-            Log.ForContext("Area", "GUI").Debug("Rendered GameView");
+            Program.Log(this).Debug("Rendered GameView");
         }
     }
 }

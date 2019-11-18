@@ -1,4 +1,3 @@
-using Serilog;
 using System;
 
 namespace TwoPlayerSnake.Game
