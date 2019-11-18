@@ -11,6 +11,8 @@ namespace TwoPlayerSnake.Networking
     /// </remarks>
     sealed class InvitationManager
     {
+        private readonly Action CheckAcceptingConnections;
+
         private TcpListener _listener;
         private Dictionary<IPEndPoint, Tuple<InviteStatus, TcpWrapper<GameInitializationPacket>>> _connections;
 
@@ -20,7 +22,14 @@ namespace TwoPlayerSnake.Networking
         internal InvitationManager()
         {
             RestartAcceptingConnections();
-            
+            CheckAcceptingConnections = () =>
+            {
+                if (!AcceptingConnections)
+                {
+                    throw new ArgumentException("This method cannot be called when the InvitationManager isn't accepting connections");
+                }
+            };
+
             // create a listener and let the underlying provider determine the local endpoint
             _listener = new TcpListener(IPAddress.Any, 0);
             ListenerEndPoint = (IPEndPoint)_listener.LocalEndpoint;
@@ -30,6 +39,7 @@ namespace TwoPlayerSnake.Networking
             _listener.BeginAcceptTcpClient(AcceptConnection, null);
 
         }
+
         internal void RestartAcceptingConnections()
         {
             if (AcceptingConnections)
@@ -38,6 +48,11 @@ namespace TwoPlayerSnake.Networking
             }
             AcceptingConnections = true;
         }
+
+        /// <summary>
+        /// Syncs the internal <code>_connections</code> with <code>liveConnections</code>.
+        /// New connections are added and dead ones are removed
+        /// </summary>
         internal void CloseDeadConnections(HashSet<IPEndPoint> liveConnections)
         {
             foreach (IPEndPoint deadKey in _connections.Keys.Where(x => !liveConnections.Contains(x)))
@@ -50,6 +65,7 @@ namespace TwoPlayerSnake.Networking
                 _connections.Add(newKey, NewEmptyConnection());
             }
         }
+
         internal Dictionary<IPEndPoint, InviteStatus> GetContext()
         {
             var toReturn = new Dictionary<IPEndPoint, InviteStatus>();
@@ -60,16 +76,28 @@ namespace TwoPlayerSnake.Networking
             return toReturn;
         }
 
+        // Methods called from outside when invitations are
+        // accepted, rejected, withdrawn and sent
+        #region Invitation Actions
+
         internal void AcceptInvitationFrom(IPEndPoint player)
         {
+            CheckAcceptingConnections();
             SendAndClose(player, InviteStatus.SentByRemote, InitRequest.Accept);
             JoinGameWith(player);
         }
-        internal void RejectInvitationFrom(IPEndPoint player) =>
-            SendAndClose(player, InviteStatus.SentByRemote, InitRequest.Reject);
 
-        internal void WithdrawInvitationTo(IPEndPoint player) =>
+        internal void RejectInvitationFrom(IPEndPoint player)
+        {
+            CheckAcceptingConnections();
+            SendAndClose(player, InviteStatus.SentByRemote, InitRequest.Reject);
+        }
+
+        internal void WithdrawInvitationTo(IPEndPoint player)
+        {
+            CheckAcceptingConnections();
             SendAndClose(player, InviteStatus.SentByUs, InitRequest.Withdraw);
+        }
 
         internal void SendInvitationTo(IPEndPoint player)
         {
@@ -100,11 +128,23 @@ namespace TwoPlayerSnake.Networking
             };
             _connections[player] = Tuple.Create(InviteStatus.SentByUs, wrapper);
         }
+        #endregion
 
+        /// <summary>
+        /// Raised when we receive an accepting response to an invitation we sent,
+        /// or when we ourselves accept an invitation someone has sent us.
+        ///
+        /// The <code>UdpWrapper&lt;GamePacket&gt;</code> should be used to communicate
+        /// with the other player in the newly established game.
+        /// </summary>
         internal event Action<UdpWrapper<GamePacket>> JoinGameEvent;
 
         #region Private methods
 
+        /// <summary>
+        /// Callback to <code>TcpClient.BeginReceive</code>. If we are accepting connections (<see cref="AcceptingConnections"/>),
+        /// and the sender is <see cref="InviteStatus.None"/>, their invite is registered
+        /// </summary>
         private void AcceptConnection(IAsyncResult result)
         {
             TcpClient client = _listener.EndAcceptTcpClient(result);
@@ -115,15 +155,17 @@ namespace TwoPlayerSnake.Networking
 
             if (!AcceptingConnections)
             {
+                Program.Log(this).Warning("TcpListener recieved connection while not AcceptingConnections");
                 wrapper.Send(new GameInitializationPacket(InitRequest.Reject));
                 wrapper.Dispose();
                 return;
             }
 
             // can only accept invitations from remotes with no preexisting invites
-            if (_connections[player].Item1 == InviteStatus.None)
+            if (!_connections.ContainsKey(player) || _connections[player].Item1 == InviteStatus.None)
             {
                 _connections[player] = Tuple.Create(InviteStatus.SentByRemote, wrapper);
+                // If a withdrawal is received
                 wrapper.ReceiveEvent += () =>
                 {
                     wrapper.Dispose();
@@ -155,6 +197,10 @@ namespace TwoPlayerSnake.Networking
             _connections[player] = NewEmptyConnection();
         }
 
+
+        /// <summary>
+        /// Helper function for closing all other connections and raising a <see cref="JoinGameEvent"/>
+        /// </summary>
         private void JoinGameWith(IPEndPoint player)
         {
             AcceptingConnections = false;
