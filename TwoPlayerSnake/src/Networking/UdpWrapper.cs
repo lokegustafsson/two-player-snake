@@ -48,9 +48,15 @@ namespace TwoPlayerSnake.Networking
 
         private void OnReceive(IAsyncResult result)
         {
+            Program.Log(this).Debug("{this} received", this.GetType().Name);
             IPEndPoint origin = new IPEndPoint(IPAddress.Any, 0);
             byte[] data = _client.EndReceive(result, ref origin);
-            Debug.Assert(origin == _client.Client.RemoteEndPoint);
+            _client.BeginReceive(OnReceive, null);
+            if (!origin.Equals(_client.Client.RemoteEndPoint))
+            {
+                Program.Log(this).Error("Received from someone other than the designated remote");
+                return;
+            }
 
             try
             {
@@ -65,7 +71,6 @@ namespace TwoPlayerSnake.Networking
                 // Simply ignore invalid received objects
                 Program.Log(this).Error(e, "Received non-{T}", typeof(T));
             }
-            _client.BeginReceive(OnReceive, null);
         }
     }
 }
