@@ -23,7 +23,7 @@ namespace TwoPlayerSnake.GUI
             Items = playerData.Select(x =>
             {
                 InviteStatus status;
-                if (_context.TryGetValue(x.ListenerEndPoint, out status))
+                if (_context.TryGetValue(x.PublicEndPoint, out status))
                 {
                     return Tuple.Create(x, status);
                 }
@@ -33,11 +33,11 @@ namespace TwoPlayerSnake.GUI
         internal void SetContext(Dictionary<IPEndPoint, InviteStatus> context)
         {
             _context = context;
-            Items.RemoveAll(x => !_context.ContainsKey(x.Item1.ListenerEndPoint));
+            Items.RemoveAll(x => !_context.ContainsKey(x.Item1.PublicEndPoint));
             for (int i = 0; i < Items.Count; i++)
             {
                 var (player, status) = Items[i];
-                Items[i] = Tuple.Create(player, _context[player.ListenerEndPoint]);
+                Items[i] = Tuple.Create(player, _context[player.PublicEndPoint]);
             }
         }
 

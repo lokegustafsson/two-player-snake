@@ -15,14 +15,14 @@ namespace TwoPlayerSnake.GUI
             AvaloniaXamlLoader.Load(this);
             Data = new Player()
             {
-                ListenerEndPoint = null,
+                PublicEndPoint = null,
                 Name = "MyName",
                 Opponent = null
             };
         }
-        internal void SetListenerEndPoint(IPEndPoint listenerEndPoint)
+        internal void SetPublicEndPoint(IPEndPoint publicEndPoint)
         {
-            Data.ListenerEndPoint = listenerEndPoint;
+            Data.PublicEndPoint = publicEndPoint;
         }
     }
 }

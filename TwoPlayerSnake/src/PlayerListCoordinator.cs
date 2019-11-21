@@ -29,7 +29,7 @@ namespace TwoPlayerSnake
             _invitationManager = new InvitationManager();
             _invitationManager.JoinGameEvent += onJoinGameEvent;
 
-            _playerDataBox.SetListenerEndPoint(_invitationManager.ListenerEndPoint);
+            _playerDataBox.SetPublicEndPoint(_invitationManager.ListenerEndPoint);
         }
 
         protected override void Update()
@@ -39,7 +39,7 @@ namespace TwoPlayerSnake
 
             List<Player> players = _multicaster.GetReceived();
             _playerView.SetData(players);
-            _invitationManager.CloseDeadConnections(players.Select(x => x.ListenerEndPoint).ToHashSet());
+            _invitationManager.CloseDeadConnections(players.Select(x => x.PublicEndPoint).ToHashSet());
         }
     }
 }
