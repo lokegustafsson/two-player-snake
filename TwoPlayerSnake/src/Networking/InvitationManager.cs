@@ -53,9 +53,9 @@ namespace TwoPlayerSnake.Networking
         /// Syncs the internal <code>_connections</code> with <code>liveConnections</code>.
         /// New connections are added and dead ones are removed
         /// </summary>
-        internal void CloseDeadConnections(HashSet<IPEndPoint> liveConnections)
+        internal void SyncConnections(HashSet<IPEndPoint> liveConnections)
         {
-            foreach (IPEndPoint deadKey in _connections.Keys.Where(x => !liveConnections.Contains(x)))
+            foreach (IPEndPoint deadKey in _connections.Keys.ToList().Where(x => !liveConnections.Contains(x)))
             {
                 _connections[deadKey].Item2?.Dispose();
                 _connections.Remove(deadKey);
