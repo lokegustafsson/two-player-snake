@@ -39,7 +39,7 @@ namespace TwoPlayerSnake
 
             List<Player> players = _multicaster.GetReceived();
             _playerView.SetData(players);
-            _invitationManager.CloseDeadConnections(players.Select(x => x.PublicEndPoint).ToHashSet());
+            _invitationManager.SyncConnections(players.Select(x => x.PublicEndPoint).ToHashSet());
         }
     }
 }
