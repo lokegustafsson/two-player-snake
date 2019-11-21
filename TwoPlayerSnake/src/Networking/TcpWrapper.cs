@@ -46,6 +46,7 @@ namespace TwoPlayerSnake.Networking
                 try
                 {
                     Received.Enqueue((T)_serializer.ReadObject(_stream));
+                    Program.Log(this).Debug("{this} received", this.GetType().Name);
                     ReceiveEvent();
                 }
                 catch (SerializationException e)
