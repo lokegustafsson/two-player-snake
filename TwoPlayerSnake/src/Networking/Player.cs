@@ -15,20 +15,20 @@ namespace TwoPlayerSnake.Networking
         [DataMember]
         internal string Name;
         [DataMember]
-        private string ListenerEndPointSerializable;
+        private string _publicEndPoint;
         [DataMember]
-        private string OpponentSerializable;
+        private string _opponent;
 
-        internal IPEndPoint ListenerEndPoint
+        internal IPEndPoint PublicEndPoint
         {
-            get { return Decode(ListenerEndPointSerializable); }
-            set { ListenerEndPointSerializable = Encode(value); }
+            get { return Decode(_publicEndPoint); }
+            set { _publicEndPoint = Encode(value); }
         }
 
         internal IPEndPoint Opponent
         {
-            get { return Decode(OpponentSerializable); }
-            set { OpponentSerializable = Encode(value); }
+            get { return Decode(_opponent); }
+            set { _opponent = Encode(value); }
         }
 
         #region Private
