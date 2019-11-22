@@ -20,11 +20,10 @@ namespace TwoPlayerSnake
             _playerView = appWindow.Locate<PlayerListView>();
             _playerDataBox = appWindow.Locate<PlayerDataBox>();
             {
-                UdpClient multicastClient = new UdpClient();
+                UdpClient multicastClient = new UdpClient(Config.MulticastEndPoint.Port);
                 multicastClient.JoinMulticastGroup(Config.MulticastEndPoint.Address);
-                multicastClient.Connect(Config.MulticastEndPoint);
                 multicastClient.MulticastLoopback = true;
-                _multicaster = new UdpWrapper<Player>(multicastClient);
+                _multicaster = new UdpWrapper<Player>(multicastClient, Config.MulticastEndPoint, false);
             }
             _invitationManager = new InvitationManager();
             _invitationManager.JoinGameEvent += onJoinGameEvent;

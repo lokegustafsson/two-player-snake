@@ -11,17 +11,31 @@ namespace TwoPlayerSnake.Networking
     sealed class UdpWrapper<T> : IDisposable
     {
         private UdpClient _client;
+        private IPEndPoint _remote;
+        private bool _exclusiveConnection;
         private List<T> _received;
         private DataContractSerializer _serializer;
 
         internal bool Pending { get { return _received.Count != 0; } }
 
-        internal UdpWrapper(UdpClient client)
+        internal UdpWrapper(UdpClient client, IPEndPoint remote, bool exclusiveConnection)
         {
             _client = client;
-            _serializer = new DataContractSerializer(typeof(T));
+            _remote = remote;
+            _exclusiveConnection = exclusiveConnection;
+
+            if (_client.Client.Connected)
+            {
+                throw new ArgumentException("The passed UdpClient must not be connected!");
+            }
+            if (exclusiveConnection)
+            {
+                _client.Connect(remote);
+            }
 
             _received = new List<T>();
+            _serializer = new DataContractSerializer(typeof(T));
+
             _client.BeginReceive(OnReceive, null);
         }
         public void Dispose() => _client.Dispose();
@@ -32,9 +46,17 @@ namespace TwoPlayerSnake.Networking
             {
                 _serializer.WriteObject(ms, payload);
                 byte[] dgram = ms.ToArray();
-                _client.Send(dgram, dgram.Length);
+                if (_exclusiveConnection)
+                {
+                    _client.Send(dgram, dgram.Length);
+                }
+                else
+                {
+                    _client.Send(dgram, dgram.Length, _remote);
+                }
             }
         }
+
         internal List<T> GetReceived()
         {
             List<T> received;
@@ -49,14 +71,20 @@ namespace TwoPlayerSnake.Networking
         private void OnReceive(IAsyncResult result)
         {
             Program.Log(this).Debug("{this} received", this.GetType().Name);
-            IPEndPoint origin = new IPEndPoint(IPAddress.Any, 0);
-            byte[] data = _client.EndReceive(result, ref origin);
-            _client.BeginReceive(OnReceive, null);
-            if (!origin.Equals(_client.Client.RemoteEndPoint))
+            
+            byte[] data;
+            try
             {
-                Program.Log(this).Error("Received from someone other than the designated remote");
+                IPEndPoint origin = new IPEndPoint(IPAddress.Any, 0);
+                data = _client.EndReceive(result, ref origin);
+            }
+            catch (ObjectDisposedException e)
+            {
+                Program.Log(this).Warning(e, "{this} recieved after disposing", this.GetType().Name);
                 return;
             }
+
+            _client.BeginReceive(OnReceive, null);
 
             try
             {
@@ -69,7 +97,7 @@ namespace TwoPlayerSnake.Networking
             catch (SerializationException e)
             {
                 // Simply ignore invalid received objects
-                Program.Log(this).Error(e, "Received non-{T}", typeof(T));
+                Program.Log(this).Warning(e, "Received non-{T}", typeof(T));
             }
         }
     }

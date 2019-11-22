@@ -218,9 +218,7 @@ namespace TwoPlayerSnake.Networking
                 }
             }
             // udp setup and return
-            UdpClient client = new UdpClient();
-            client.Connect(player);
-            JoinGameEvent(new UdpWrapper<GamePacket>(client));
+            JoinGameEvent(new UdpWrapper<GamePacket>(new UdpClient(), player, true));
         }
 
         private Tuple<InviteStatus, TcpWrapper<GameInitializationPacket>> NewEmptyConnection() =>

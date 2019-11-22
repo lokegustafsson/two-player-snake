@@ -15,17 +15,41 @@ namespace TwoPlayerSnake.Test.Networking
         public void CanLoopback()
         {
             IPEndPoint localEP = new IPEndPoint(IPAddress.Loopback, 34525);
-
             UdpClient client = new UdpClient(localEP);
-            client.Connect(localEP);
-            var wrapper = new UdpWrapper<string>(client);
+            string msg = "testingCanLoopback";
 
-            wrapper.Send("testing");
-            Thread.Sleep(10);
-            Assert.True(wrapper.Pending);
-            var recieved = wrapper.GetReceived();
-            Assert.Single(recieved);
-            Assert.Equal(recieved.Single(), "testing");
+            using (var wrapper = new UdpWrapper<string>(client, localEP, true))
+            {
+                wrapper.Send(msg);
+                Thread.Sleep(10);
+                Assert.True(wrapper.Pending);
+                var recieved = wrapper.GetReceived();
+                Assert.False(wrapper.Pending);
+                Assert.Single(recieved);
+                Assert.Equal(recieved.Single(), msg);
+            }
+        }
+
+        [Fact]
+        public void CanMulticastLoopback()
+        {
+            IPEndPoint multicastEP = Config.MulticastEndPoint;
+            string msg = "testingCanMulticastLoopBack";
+
+            UdpClient client = new UdpClient(multicastEP.Port);
+            client.JoinMulticastGroup(multicastEP.Address);
+            client.MulticastLoopback = true;
+
+            using (var wrapper = new UdpWrapper<string>(client, multicastEP, false))
+            {
+                wrapper.Send(msg);
+                Thread.Sleep(10);
+                Assert.True(wrapper.Pending);
+                var recieved = wrapper.GetReceived();
+                Assert.False(wrapper.Pending);
+                Assert.Single(recieved);
+                Assert.Equal(recieved.Single(), msg);
+            }
         }
     }
 }
