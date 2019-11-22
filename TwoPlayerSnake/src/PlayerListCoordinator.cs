@@ -34,12 +34,13 @@ namespace TwoPlayerSnake
 
         protected override void Update()
         {
-            _multicaster.Send(_playerDataBox.Data);
-            _playerView.SetContext(_invitationManager.GetContext());
-
             List<Player> players = _multicaster.GetReceived();
-            _playerView.SetData(players);
+            Program.Log(this).Information("Multicaster recieved {num} players", players.Count);
             _invitationManager.SyncConnections(players.Select(x => x.PublicEndPoint).ToHashSet());
+
+            _playerView.Set(players, _invitationManager.GetContext());
+
+            _multicaster.Send(_playerDataBox.Data);
         }
     }
 }
