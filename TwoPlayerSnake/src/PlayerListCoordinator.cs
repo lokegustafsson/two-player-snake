@@ -2,23 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
-using TwoPlayerSnake.GUI;
+using TwoPlayerSnake.ViewModels;
 using TwoPlayerSnake.Networking;
 
 namespace TwoPlayerSnake
 {
     sealed class PlayerListCoordinator : Coordinator
     {
-        private readonly PlayerListView _playerView;
-        private readonly PlayerDataBox _playerDataBox;
+        private readonly PlayerListViewModel _playerView;
+        private readonly PlayerDataViewModel _playerDataBox;
         private readonly UdpWrapper<Player> _multicaster;
         private readonly InvitationManager _invitationManager;
 
-        internal PlayerListCoordinator(AppWindow appWindow, Action<UdpWrapper<GamePacket>> onJoinGameEvent)
+        internal PlayerListCoordinator(PlayerListViewModel listViewModel, PlayerDataViewModel dataViewModel, Action<UdpWrapper<GamePacket>> onJoinGameEvent)
         {
 
-            _playerView = appWindow.Locate<PlayerListView>();
-            _playerDataBox = appWindow.Locate<PlayerDataBox>();
+            _playerView = listViewModel;
+            _playerDataBox = dataViewModel;
             {
                 UdpClient multicastClient = new UdpClient(Config.MulticastEndPoint.Port);
                 multicastClient.JoinMulticastGroup(Config.MulticastEndPoint.Address);
@@ -34,12 +34,12 @@ namespace TwoPlayerSnake
         protected override void Update()
         {
             List<Player> players = _multicaster.GetReceived();
-            Program.Log(this).Information("Multicaster recieved {num} players", players.Count);
+            Program.Log(this).Debug("Multicaster recieved {num} players", players.Count);
             _invitationManager.SyncConnections(players.Select(x => x.PublicEndPoint).ToHashSet());
 
             _playerView.Set(players, _invitationManager.GetContext());
 
-            _multicaster.Send(_playerDataBox.Data);
+            _multicaster.Send(_playerDataBox.Actor);
         }
     }
 }

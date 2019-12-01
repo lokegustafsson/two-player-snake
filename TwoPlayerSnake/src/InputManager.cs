@@ -9,7 +9,7 @@ namespace TwoPlayerSnake
         internal InputManager()
         {
         }
-        internal void OnKeyDown(object sender, KeyEventArgs args)
+        internal void OnKeyDown(KeyEventArgs args)
         {
             switch (args.Key)
             {

@@ -1,7 +1,8 @@
+using Avalonia.Input;
 using System;
 using System.Diagnostics;
 using System.Linq;
-using TwoPlayerSnake.GUI;
+using TwoPlayerSnake.ViewModels;
 using TwoPlayerSnake.Networking;
 using TwoPlayerSnake.Game;
 
@@ -9,22 +10,17 @@ namespace TwoPlayerSnake
 {
     sealed class GameCoordinator : Coordinator
     {
-        private readonly AppWindow _appWindow;
-        private readonly GameView _gameView;
+        private readonly GameViewModel _gameViewModel;
         private readonly InputManager _input;
 
         private Match _match;
         private UdpWrapper<GamePacket> _connection;
 
-        internal GameCoordinator(AppWindow appWindow)
+        internal GameCoordinator(GameViewModel gameViewModel)
         {
-            _appWindow = appWindow;
-
-            _gameView = appWindow.Locate<GameView>();
-
+            _gameViewModel = gameViewModel;
             _input = new InputManager();
-            appWindow.KeyDown += _input.OnKeyDown;
-            
+
             _match = new Match();
             _match.MatchFinishedEvent += OnMatchFinishedEvent;
         }
@@ -59,10 +55,15 @@ namespace TwoPlayerSnake
             }
 
             _match.ApplyTurn(_input.Direction, remoteMove);
-            _gameView.SetData(_match.GetCells());
+            _gameViewModel.Cells = _match.GetCells();
 
             st.Stop();
             Program.Log(this).Debug(String.Format("Update took {0} ms", st.ElapsedMilliseconds));
+        }
+
+        internal void OnKeyDown(KeyEventArgs args)
+        {
+            _input.OnKeyDown(args);
         }
 
         private void OnMatchFinishedEvent(MatchResult result)

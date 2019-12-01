@@ -1,7 +1,9 @@
 ﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Logging.Serilog;
 using Serilog;
-using TwoPlayerSnake.GUI;
+using TwoPlayerSnake.ViewModels;
+using TwoPlayerSnake.Views;
 
 namespace TwoPlayerSnake
 {
@@ -10,17 +12,28 @@ namespace TwoPlayerSnake
         private static void Main(string[] args)
         {
             Serilog.Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
+                .MinimumLevel.Information()
                 .WriteTo.Console(outputTemplate: "{Area}: {Message} {Exception}{NewLine}")
                 .CreateLogger();
+            SerilogLogger.Initialize(Serilog.Log.Logger);
             AppBuilder.Configure<App>().UsePlatformDetect().LogToDebug().Start(AppMain, args);
         }
 
         private static void AppMain(Application app, string[] args)
         {
-            AppWindow appWindow = new AppWindow();
-            var gameCoordinator = new GameCoordinator(appWindow);
-            var playerCoordinator = new PlayerListCoordinator(appWindow, gameCoordinator.StartGame);
+            var VMs = new
+            {
+                GameViewModel = new GameViewModel(),
+                List = new PlayerListViewModel(),
+                Data = new PlayerDataViewModel()
+            };
+            AppWindow appWindow = new AppWindow()
+            {
+                DataContext = VMs
+            };
+            var gameCoordinator = new GameCoordinator(VMs.GameViewModel);
+            appWindow.KeyDown += (o, e) => gameCoordinator.OnKeyDown(e);
+            var playerCoordinator = new PlayerListCoordinator(VMs.List, VMs.Data, gameCoordinator.StartGame);
 
             gameCoordinator.Run(Config.GameStepTime);
             playerCoordinator.Run(Config.CommunicationStepTime);

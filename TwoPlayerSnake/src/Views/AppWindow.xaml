@@ -1,0 +1,29 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TwoPlayerSnake.Views"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="TwoPlayerSnake.Views.AppWindow"
+        Title="AvaloniaAppTemplate">
+  <DockPanel>
+    <Border Width="{Binding $parent[Window].Bounds.Height}"
+            Height="{Binding $parent[Window].Bounds.Height}"
+            Background="Purple"
+            DockPanel.Dock="Right">
+      <local:GameView Cells="{Binding GameViewModel.Cells}"
+                      EmptyBrush="WhiteSmoke"
+                      FoodBrush="IndianRed"
+                      FriendlyBrush="LimeGreen"
+                      HostileBrush="DarkViolet">
+        <local:GameView.GridPen>
+          <Pen Brush="LightGray" Thickness="5"/>
+        </local:GameView.GridPen>
+      </local:GameView>
+    </Border>
+    <local:PlayerListView DataContext="{Binding PlayerListViewModel}"
+                          DockPanel.Dock="Top"/>
+    <local:PlayerDataView DataContext="{Binding PlayerDataViewModel}"
+                          DockPanel.Dock="Bottom"/>
+  </DockPanel>
+</Window>

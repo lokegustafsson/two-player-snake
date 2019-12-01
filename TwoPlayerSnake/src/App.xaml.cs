@@ -1,17 +1,16 @@
 using Avalonia;
 using Avalonia.Markup.Xaml;
-using Avalonia.Logging.Serilog;
 using Serilog;
 
-namespace TwoPlayerSnake.GUI
+namespace TwoPlayerSnake
 {
     sealed class App : Application
     {
         public override void Initialize()
         {
-            SerilogLogger.Initialize(Log.Logger);
+            Program.Log(this).Information("Starting initialization");
             AvaloniaXamlLoader.Load(this);
-            Program.Log(this).Information("App initialized");
+            Program.Log(this).Information("Finished initialization");
         }
     }
 }
